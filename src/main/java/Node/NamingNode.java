@@ -13,9 +13,8 @@ public class NamingNode{
     private String node_IP;
     private String namingServer_IP;
     private int hash;
-    private int nodes;
-    private int lowerNeighbour;
-    private int higherNeighbour;
+    private int amount;
+    private String nodes;
 
     public NamingNode(String name) { //constructor
         //turn off most of the logging
@@ -28,7 +27,7 @@ public class NamingNode{
         boolean received = false;
         InetAddress broadcast = InetAddress.getByName("255.255.255.255"); //Broadcast
         DatagramSocket socket = new DatagramSocket(8000); // receiving port
-        socket.setSoTimeout(1000); // wait for 1 s when we try to receive()
+        socket.setSoTimeout(1000); // wait for 2 s when we try to receive()
         byte[] receive = new byte[512];
         DatagramPacket sendPacket = new DatagramPacket(name.getBytes(), name.length(), broadcast, 8001); //broadcast on port 8001
         DatagramPacket receivePacket = new DatagramPacket(receive, receive.length);  // receivePacket
@@ -38,7 +37,8 @@ public class NamingNode{
             System.out.println("sent packet to: " + sendPacket.getSocketAddress());
 
             try { // If we receive
-                socket.receive(receivePacket); // So now timeout for 1s
+                socket.receive(receivePacket); // So now timeout for 2s
+                received = true;
                 System.out.println("received packet from: " + receivePacket.getSocketAddress());
                 String data = new String(receivePacket.getData()).trim();
                 System.out.println("received data: " + data);
@@ -50,14 +50,13 @@ public class NamingNode{
                 String status = ((JSONObject)obj).get("node").toString();
 
                 if (status.equals("Added successfully")){
-                    this.hash =   (int) (long)(((JSONObject)obj).get("node hash"));
-                    this.nodes  = (int) (long)(((JSONObject)obj).get("nodes"));
-                    this.lowerNeighbour = (int) (long)(((JSONObject)obj).get("lowerNeighbour hash"));
-                    this.higherNeighbour = (int) (long) (((JSONObject)obj).get("higherNeighbour hash"));
+                    this.hash =   (int) (long) ((JSONObject)obj).get("node hash");
+                    this.amount = (int) (long) ((JSONObject)obj).get("node amount");
+                    this.nodes  =  ((JSONObject)obj).get("nodes").toString();
                 }else if (status.equals("Error: Node was not added")){
                     System.out.println("Error: Node was not added");
                 }
-                received = true;
+
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -84,9 +83,8 @@ public class NamingNode{
         System.out.println("Node IP:\t\t" + this.node_IP);
         System.out.println("NamingServer IP:\t" + this.namingServer_IP);
         System.out.println("Node hash:\t\t" + this.hash);
+        System.out.println("Node amount:\t\t" + this.amount);
         System.out.println("Nodes:\t\t\t" + this.nodes);
-        System.out.println("lowerNeighbour hash:\t" + this.lowerNeighbour);
-        System.out.println("higherNeighbour hash:\t" + this.higherNeighbour);
         System.out.println("node hostname + IP : " + InetAddress.getLocalHost());
     }
 

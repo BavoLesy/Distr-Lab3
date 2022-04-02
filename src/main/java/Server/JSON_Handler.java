@@ -10,6 +10,7 @@ public class JSON_Handler extends NamingServer {
     private static final String mappingFile = "src/main/resources/nodeMapping.json";
     static void writeFile() {
         try {
+            //write from IP mapping into file
             JSONObject jsonObject = new JSONObject();
             getIpMapLock().readLock().lock();
             for (int key : getIpMapping().keySet()) {
@@ -27,7 +28,7 @@ public class JSON_Handler extends NamingServer {
     static void readFile() throws ParseException {
         try {
             //read from file into the IP mapping
-            BufferedReader reader = new BufferedReader(new FileReader(new File(mappingFile)));
+            BufferedReader reader = new BufferedReader(new FileReader(mappingFile));
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(reader.lines().collect(Collectors.joining(System.lineSeparator())));
             getIpMapLock().writeLock().lock();
@@ -38,7 +39,6 @@ public class JSON_Handler extends NamingServer {
             }
             getIpMapLock().writeLock().unlock();
         } catch (IOException | ParseException ignored) {
-
         }
     }
 }

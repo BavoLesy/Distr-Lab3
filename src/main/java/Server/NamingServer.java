@@ -10,20 +10,23 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RestController
 public class NamingServer {
+
     Logger logger = LoggerFactory.getLogger(NamingServer.class);
     private static final TreeMap<Integer, String> ipMapping = new TreeMap<>();
     static ReadWriteLock ipMapLock = new ReentrantReadWriteLock(); //lock to avoid reading when someone else is writing and vice versa
-    DiscoveryHandler discoveryHandler;
+    Discovery_Handler discoveryHandler;
 
     public NamingServer() {
-        this.discoveryHandler = new DiscoveryHandler(this);
+        this.discoveryHandler = new Discovery_Handler(this);
         discoveryHandler.start();
     }
 
@@ -82,15 +85,33 @@ public class NamingServer {
         ipMapLock.readLock().unlock();
         return entry.getValue();
     }
-    private static class DiscoveryHandler extends Thread{
+    public static String getNodes(){
+        Set<Map.Entry<Integer,String>> entries = getIpMapping().entrySet();
+        int i = 1;
+        StringBuilder nodes = new StringBuilder();
+        for(Map.Entry<Integer,String> entry : entries){
+            nodes.append("Node #");
+            nodes.append(i);
+            nodes.append(": ");
+            nodes.append(entry.getKey().toString());
+            nodes.append(" with IP ");
+            nodes.append(entry.getValue());
+            nodes.append(",");
+            i++;
+        }
+        return nodes.toString();
+    }
+
+    private static class Discovery_Handler extends Thread{
         NamingServer nameServer;
         boolean running = false;
         DatagramSocket socket;
-        public DiscoveryHandler(NamingServer nameServer) {
+        public Discovery_Handler(NamingServer nameServer) {
             this.nameServer = nameServer;
             try {
                 this.socket = new DatagramSocket(8001);
                 this.socket.setBroadcast(true);
+                this.socket.setSoTimeout(888); // wait for 1 s when we try to receive()
             } catch (SocketException e) {
                 e.printStackTrace();
             }
@@ -109,37 +130,26 @@ public class NamingServer {
                     String buffer = new String(receivePacket.getData()).trim();
                     String IP = receivePacket.getAddress().getHostAddress();
                     int hash = this.nameServer.addNode(buffer,IP);
-                    String send;
+                    String send = " ";
                     if (hash != -1){
-                        int lowerNeighbour;
-                        int higherNeighbour;
                         ipMapLock.readLock().lock();
-                        if(getIpMapping().lowerKey(hash-1) != null){ // If there is a lower node
-                            lowerNeighbour = getIpMapping().lowerKey(hash-1); // get this node
-                        }else{
-                            lowerNeighbour = getIpMapping().lastKey();  // if there is no lower node, the node himself is this node
-                        }
-                        if(getIpMapping().higherKey(hash+1) != null){
-                            higherNeighbour = getIpMapping().higherKey(hash+1);
-                        }else{
-                            higherNeighbour = getIpMapping().firstKey();
-                        }
                         send = "{\"node\":\"Added successfully\"," +
                                 "\"node hash\":" + hash + "," +
-                                "\"nodes\":" + getIpMapping().size() + "," +
-                                "\"lowerNeighbour hash\":" + lowerNeighbour + "," +
-                                "\"higherNeighbour hash\":" + higherNeighbour + "}";
+                                "\"node amount\":" + getIpMapping().size() +
+                                "\"nodes\":\"" + getNodes() + "\"}";
                         ipMapLock.readLock().unlock();
+                        this.nameServer.logger.info("Node added successfully");
                     }else{
                         //adding unsuccessful
                         this.nameServer.logger.info("Error: node was not added");
                         send = "{\"node\":\"Error: Node was not added\"}";
                     }
-                    DatagramPacket sendPacket = new DatagramPacket(send.getBytes(StandardCharsets.UTF_8), send.length(), receivePacket.getAddress(), receivePacket.getPort());
+                    DatagramPacket sendPacket = new DatagramPacket(send.getBytes(StandardCharsets.UTF_8), send.length(), receivePacket.getAddress(), 8000);
                     this.socket.send(sendPacket);
-
                 } catch (IOException ignore) {}
             }
         }
     }
+
+
 }
