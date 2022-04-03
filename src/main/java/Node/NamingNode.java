@@ -24,7 +24,7 @@ public class NamingNode{
     public void getFile(String filename) {
         try {
             //String URL = "http://localhost:8080/NamingServer/getFile/" + filename; //REST command
-            String URL = "http://" + this.namingServer_IP + ":8080/NamingServer/getFile/" + filename;
+            String URL = "http://" + this.namingServer_IP + ":8080/NamingServer/Files/" + filename;
             System.out.println(Unirest.get(URL).asString().getBody());
         } catch (Exception e) {
             e.printStackTrace();
