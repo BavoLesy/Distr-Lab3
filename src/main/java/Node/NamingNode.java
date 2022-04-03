@@ -63,9 +63,9 @@ public class NamingNode{
     }
 
     public void printOut() throws UnknownHostException {
-        System.out.println("Node IP:\t\t\t" + this.node_IP);
+        System.out.println("Node IP:\t\t" + this.node_IP);
         System.out.println("NamingServer IP:\t" + this.namingServer_IP);
-        System.out.println("Node hash:\t\t\t" + this.hash);
+        System.out.println("Node hash:\t\t" + this.hash);
         System.out.println("Node amount:\t\t" + this.amount);
         System.out.println("Nodes:\t\t\t" + this.nodes);
         System.out.println("node hostname + IP : " + InetAddress.getLocalHost());

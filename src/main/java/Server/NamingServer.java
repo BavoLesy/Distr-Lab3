@@ -61,7 +61,7 @@ public class NamingServer {
         ipMapLock.writeLock().unlock();
         return "Node " + name + " with hash: " + hash + " was removed\n";
     }
-    @GetMapping("/NamingServer/getFile/{filename}")
+    @GetMapping("/NamingServer/Files/{filename}")
     public String getFile(@PathVariable(value = "filename") String fileName) {
         this.logger.info("Where is file?: " + fileName);
         int hash = hash(fileName);
