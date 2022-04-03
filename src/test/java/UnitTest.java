@@ -27,36 +27,39 @@ public class UnitTest {
         Assertions.assertEquals("192.168.80.3", NamingServer.getIpMapping().get(ns.hash("Bavo")));
         Assertions.assertEquals(2, NamingServer.getIpMapping().size());
     }
-}
-/*
+
     @Test
-    public void addNodeExisting(){
-        Assumptions.assumeTrue(ns.addNode("Bavo", "192.168.80.3") != -1);
-        Assumptions.assumeFalse(ns.addNode("Bavo", "192.168.80.3") != -1); //should return -1 because already exists
+    public void addNodeExisting() {
+        String name = "Bavo";
+        int hash = ns.hash(name);
+        Assumptions.assumeTrue(ns.addNode("Bavo", "192.168.80.3").equals("Added Node " + name + " with hash: " + hash + "\n"));
+        Assumptions.assumeTrue(ns.addNode("Bavo", "192.168.80.3").equals("Node " + name + " with hash: " + hash + " already exists or has the same hash as another node\n")); //should return -1 because already exists
         Assertions.assertEquals(1, NamingServer.getIpMapping().size());
     }
 
+
     @Test
-    public void sendFileName(){
+    public void sendFileName() {
         ns.addNode("Bavo", "192.168.80.3");
-        int test = ns.addNode("Jeoffrey", "192.168.80.5");
+        ns.addNode("Jeoffrey", "192.168.80.5");
+        int hash = ns.hash("Jeoffrey");
         ns.addNode("Max", "192.168.80.2");
         ns.addNode("Oliver", "192.168.80.4");
         ns.addNode("King", "192.168.80.6");
         System.out.println("nodes: " + NamingServer.getIpMapping().toString());
         String myStr = "test.txt";
-        System.out.println("testFile.txt = "+ ns.hash(myStr));
-        Assertions.assertEquals("192.168.80.5", ns.getFile(myStr));
-        Assertions.assertEquals(NamingServer.getIpMapping().get(test), ns.getFile(myStr));
-
+        System.out.println("testFile.txt = " + ns.hash(myStr));
+        Assertions.assertEquals("The file " + myStr + " is located at: 192.168.80.5" + "\n", ns.getFile(myStr));
     }
+
+
     @Test
     public void sendFileNameSmaller(){
         ns.addNode("Bavo", "192.168.80.3");
         ns.addNode("Jeoffrey", "192.168.80.5");
         ns.addNode("Max", "192.168.80.2");
         ns.addNode("Oliver", "192.168.80.4");
-        int test = ns.addNode("King", "192.168.80.6");
+        ns.addNode("King", "192.168.80.6");
         int hash = 32768; // highest possible of hash
         String randomString = ""; //try random names until the hash is lower than >1000
         while (hash >= 1000){
@@ -65,13 +68,14 @@ public class UnitTest {
             randomString = new String(array, StandardCharsets.UTF_8);
             hash = ns.hash(randomString);
         }
-        Assertions.assertEquals("192.168.80.6", ns.getFile(randomString));
-        Assertions.assertEquals(NamingServer.getIpMapping().get(test), ns.getFile(randomString));
+        Assertions.assertEquals("The file " + randomString + " is located at: 192.168.80.6" + "\n", ns.getFile(randomString));
+
     }
 }
 
 
- */
+
+
 
 
 

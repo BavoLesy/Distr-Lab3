@@ -38,7 +38,6 @@ public class NamingNode{
         Object obj = parser.parse(data);
         String status = ((JSONObject)obj).get("node status").toString();
         if(status.equals("Node exists")) {
-            //String name = ((JSONObject)obj).get("node name").toString();
             this.hash = (int) (long) ((JSONObject) obj).get("node hash");
             this.amount = (int) (long) ((JSONObject) obj).get("node amount");
             this.nodes = ((JSONObject) obj).get("nodes").toString();

@@ -36,16 +36,16 @@ public class NamingServer {
     @PostMapping("/NamingServer/Nodes/{node}")
     public String addNode(@PathVariable(value = "node") String name, @RequestBody String IP){
         int hash = hash(name);
-        this.logger.info("Adding node: " + name + " with hash: " + hash);
+        this.logger.info("Adding node " + name + " with hash: " + hash);
         ipMapLock.writeLock().lock();
         if (ipMapping.containsKey(hash)){
             ipMapLock.writeLock().unlock();
-            return "Node " + name + " with hash: " + hash + " already exists or has the same hash as another node";
+            return "Node " + name + " with hash: " + hash + " already exists or has the same hash as another node\n";
         }
         ipMapping.put(hash, IP);
         JSON_Handler.writeFile();
         ipMapLock.writeLock().unlock();
-        return "Added Node " + name + " with hash: " + hash;
+        return "Added Node " + name + " with hash: " + hash +"\n";
     }
     @DeleteMapping("/NamingServer/Nodes/{node}")
     public String removeNode(@PathVariable(value = "node") String name){
@@ -53,12 +53,13 @@ public class NamingServer {
         this.logger.info("Removing node: " + name + " with hash: " + hash);
         ipMapLock.writeLock().lock();
         if (!ipMapping.containsKey(hash)) {
-            return "Node " + name + " with hash: " + hash + " does not exist";
+            ipMapLock.writeLock().unlock();
+            return "Node " + name + " with hash: " + hash + " does not exist\n";
         }
         ipMapping.remove(hash);
         JSON_Handler.writeFile();
         ipMapLock.writeLock().unlock();
-        return "Node " + name + " with hash: " + hash + " was removed";
+        return "Node " + name + " with hash: " + hash + " was removed\n";
     }
     @GetMapping("/NamingServer/getFile/{filename}")
     public String getFile(@PathVariable(value = "filename") String fileName) {
@@ -72,7 +73,7 @@ public class NamingServer {
             entry = ipMapping.floorEntry(hash-1); //returns closest value lower than or equal to key (so where the file is located)
         }
         ipMapLock.readLock().unlock();
-        return "The file " + fileName + " is located at: " + entry.getValue();
+        return "The file " + fileName + " is located at: " + entry.getValue() +"\n";
     }
     @GetMapping("/NamingServer/Nodes/{node}")
     public String getNodes(@PathVariable(value = "node") String name){
