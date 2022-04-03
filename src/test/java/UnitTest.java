@@ -12,6 +12,7 @@ public class UnitTest {
         System.out.println("Before All");
         ns = new NamingServer();
     }
+
     @AfterEach
     void terminate() {
         System.out.println("terminate previous");
@@ -19,14 +20,15 @@ public class UnitTest {
     }
 
     @Test
-    public void addNodeUnique(){
+    public void addNodeUnique() {
         ns.addNode("Bavo", "192.168.80.3");
         ns.addNode("Jeoffrey", "192.168.80.5");
         System.out.println("nodes: " + NamingServer.getIpMapping().toString());
         Assertions.assertEquals("192.168.80.3", NamingServer.getIpMapping().get(ns.hash("Bavo")));
         Assertions.assertEquals(2, NamingServer.getIpMapping().size());
     }
-
+}
+/*
     @Test
     public void addNodeExisting(){
         Assumptions.assumeTrue(ns.addNode("Bavo", "192.168.80.3") != -1);
@@ -68,6 +70,8 @@ public class UnitTest {
     }
 }
 
+
+ */
 
 
 
